@@ -1,0 +1,62 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: skin_lesion_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./checkpoints:/app/checkpoints
+      - ./metrics:/app/metrics
+      - ./plots:/app/plots
+      - ./mlruns:/app/mlruns
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MODEL_PATH=/app/checkpoints/best_model.pth
+    networks:
+      - skin_lesion_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    container_name: skin_lesion_streamlit
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./checkpoints:/app/checkpoints
+      - ./metrics:/app/metrics
+      - ./plots:/app/plots
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_URL=http://api:8000
+    depends_on:
+      - api
+    networks:
+      - skin_lesion_network
+    restart: unless-stopped
+
+  mlflow:
+    image: python:3.10-slim
+    container_name: mlflow_server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlruns
+    command: >
+      sh -c "pip install mlflow==2.21.3 &&
+             mlflow ui --host 0.0.0.0 --port 5000 --backend-store-uri file:///mlruns"
+    networks:
+      - skin_lesion_network
+    restart: unless-stopped
+
+networks:
+  skin_lesion_network:
+    driver: bridge

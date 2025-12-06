@@ -1,0 +1,53 @@
+stages:
+  prepare_data:
+    cmd: python src/data/preprocessing.py
+    deps:
+      - src/data/preprocessing.py
+      - ${data.raw_dir}
+    params:
+      - data.image_size
+      - data.train_split
+      - data.val_split
+    outs:
+      - ${data.processed_dir}
+
+  train:
+    cmd: python train.py
+      --data-dir ${data.processed_dir}
+      --epochs ${training.epochs}
+      --batch-size ${training.batch_size}
+      --lr ${training.learning_rate}
+      --architecture ${model.architecture}
+    deps:
+      - src/data/dataset.py
+      - src/models/architecture.py
+      - src/models/training.py
+      - train.py
+      - ${data.processed_dir}
+    params:
+      - training
+      - model
+    outs:
+      - checkpoints/best_model.pth
+    metrics:
+      - metrics/training_metrics.json:
+          cache: false
+    plots:
+      - plots/training_curves.png:
+          cache: false
+
+  evaluate:
+    cmd: python -m src.models.evaluate
+      --model-path checkpoints/best_model.pth
+      --data-dir ${data.processed_dir}
+    deps:
+      - checkpoints/best_model.pth
+      - ${data.processed_dir}
+    metrics:
+      - metrics/evaluation_metrics.json:
+          cache: false
+    plots:
+      - plots/confusion_matrix.png:
+          cache: false
+      - plots/roc_curves.png:
+          cache: false

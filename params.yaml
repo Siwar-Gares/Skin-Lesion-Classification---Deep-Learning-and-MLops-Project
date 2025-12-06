@@ -1,0 +1,39 @@
+# Data configuration
+data:
+  raw_dir: D:/dl_data/data/HAM10000
+  processed_dir: D:/dl_data/data/processed
+  image_size: 224
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+
+# Model configuration
+model:
+  architecture: efficientnet_b3
+  num_classes: 7
+  pretrained: true
+  dropout: 0.3
+
+# Training configuration
+training:
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.0001
+  weight_decay: 0.00001
+  optimizer: adamw
+  scheduler: cosine
+  early_stopping_patience: 10
+
+# Augmentation configuration
+augmentation:
+  horizontal_flip: true
+  vertical_flip: true
+  rotation_limit: 20
+  brightness_limit: 0.2
+  contrast_limit: 0.2
+
+# Monitoring configuration
+monitoring:
+  drift_threshold: 0.05
+  log_predictions: true
+  track_performance: true
