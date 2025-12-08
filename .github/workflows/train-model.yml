@@ -6,7 +6,7 @@ on:
       epochs:
         description: 'Number of epochs'
         required: false
-        default: '50'
+        default: '10'
       architecture:
         description: 'Model architecture'
         required: false
