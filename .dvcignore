@@ -1,7 +1,6 @@
 # DVC ignore patterns
-# Add patterns of files or directories that should never be tracked by DVC
 
-# Large dataset files (handled separately)
+# Large dataset files 
 data/HAM10000_images_part_*
 *.zip
 *.tar.gz
